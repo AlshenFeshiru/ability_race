@@ -1,0 +1,10 @@
+fastapi
+uvicorn[standard]
+sqlalchemy
+pycryptodome
+groq
+python-jose[cryptography]
+python-multipart
+websockets
+aiofiles
+psycopg2-binary

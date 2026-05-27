@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Ability Race: Youth Skills Search</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#07070d;--card:#0f0f18;--b:#1a1a2e;--ac:#7c3aed;--ac2:#06b6d4;--warn:#f59e0b;--err:#ef4444;--ok:#10b981;--tx:#e2e8f0;--mu:#64748b;--f:'Segoe UI',system-ui,sans-serif}
+body{background:var(--bg);color:var(--tx);font-family:var(--f);min-height:100vh;overflow-x:hidden}
+.scr{display:none;min-height:100vh;padding:14px;max-width:460px;margin:0 auto;flex-direction:column;gap:10px}
+.scr.on{display:flex}
+.logo{text-align:center;padding:16px 0 4px}
+.logo h1{font-size:1.35rem;font-weight:900;background:linear-gradient(135deg,var(--ac),var(--ac2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.logo p{color:var(--mu);font-size:.75rem;margin-top:3px}
+.card{background:var(--card);border:1px solid var(--b);border-radius:10px;padding:14px}
+.card h3{font-size:.9rem;font-weight:700;margin-bottom:10px;color:var(--ac2)}
+input,select,textarea{width:100%;background:#0a0a12;border:1px solid var(--b);border-radius:7px;padding:9px 11px;color:var(--tx);font-size:.88rem;outline:none;transition:border .15s}
+input:focus,select:focus,textarea:focus{border-color:var(--ac)}
+textarea{resize:vertical;min-height:70px;font-family:monospace;font-size:.75rem}
+.btn{width:100%;padding:11px;border:none;border-radius:7px;font-size:.9rem;font-weight:700;cursor:pointer;transition:opacity .15s}
+.btn-p{background:linear-gradient(135deg,var(--ac),#5b21b6);color:#fff}
+.btn-s{background:var(--b);color:var(--tx)}
+.btn:hover{opacity:.85}
+.msg{padding:9px 11px;border-radius:7px;font-size:.82rem;margin-top:4px}
+.ok{background:#064e3b20;border:1px solid var(--ok);color:var(--ok)}
+.er{background:#450a0a20;border:1px solid var(--err);color:var(--err)}
+.in{background:#0a1628;border:1px solid var(--ac2);color:var(--ac2)}
+.wn{background:#451a0320;border:1px solid var(--warn);color:var(--warn)}
+.nav{display:flex;gap:5px;overflow-x:auto;padding-bottom:2px;-ms-overflow-style:none;scrollbar-width:none}
+.nav::-webkit-scrollbar{display:none}
+.nb{flex:none;padding:7px 12px;border:1px solid var(--b);border-radius:20px;background:transparent;color:var(--mu);font-size:.78rem;cursor:pointer;white-space:nowrap}
+.nb.on{border-color:var(--ac);color:var(--ac);background:#1a0a35}
+.tc{display:none}.tc.on{display:block}
+.sr{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--b)}
+.sr:last-child{border-bottom:none}
+.sv{font-weight:700;color:var(--ac2)}
+.bg{display:inline-block;padding:2px 7px;border-radius:20px;font-size:.72rem;font-weight:700}
+.bk{background:#064e3b;color:var(--ok)}.bw{background:#451a03;color:var(--warn)}.be{background:#450a0a;color:var(--err)}.bp{background:#1a0a35;color:var(--ac)}
+.opt{width:100%;padding:9px 11px;border:1px solid var(--b);border-radius:7px;background:transparent;color:var(--tx);text-align:left;cursor:pointer;margin-bottom:5px;font-size:.85rem;transition:all .15s}
+.opt:hover{border-color:var(--ac2);background:#0a1a25}
+.opt.sel{border-color:var(--ac);background:#1a0a35}
+.opt.cor{border-color:var(--ok);background:#064e3b}
+.opt.wrg{border-color:var(--err);background:#450a0a}
+.rr{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--b)}
+.rn{font-weight:800;color:var(--ac);min-width:22px}
+.ri{flex:1}.rname{font-weight:700;font-size:.87rem}.rdet{font-size:.72rem;color:var(--mu)}
+.rs{text-align:right;font-weight:700;color:var(--ac2)}
+.ac{border:1px solid var(--b);border-radius:7px;padding:9px;background:#0a0a12;cursor:pointer;transition:all .15s;margin-bottom:5px}
+.ac:hover{border-color:var(--ac)}.ac.rare{border-color:var(--warn)}
+.an{font-weight:700;font-size:.82rem}.ad{font-size:.72rem;color:var(--mu);margin-top:3px}
+.pb{height:3px;background:var(--b);border-radius:2px;margin:4px 0}
+.pf{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--ac),var(--ac2));transition:width .3s}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#1a1a2e;border:1px solid var(--ac);border-radius:7px;padding:9px 14px;font-size:.82rem;z-index:9999;max-width:280px;text-align:center;animation:su .25s ease}
+@keyframes su{from{transform:translateX(-50%) translateY(16px);opacity:0}to{transform:translateX(-50%) translateY(0);opacity:1}}
+.pk{background:#0a0a12;border:1px solid var(--warn);border-radius:7px;padding:10px;font-family:monospace;font-size:.68rem;word-break:break-all;color:var(--warn);margin:6px 0}
+.efb{padding:7px 10px;border-radius:7px;text-align:center;font-weight:700;font-size:.82rem;animation:pl 1s infinite}
+@keyframes pl{0%,100%{opacity:1}50%{opacity:.5}}
+.ef-fz{background:#0c1a2e;border:1px solid var(--ac2);color:var(--ac2)}
+.ef-dk{background:#1a0d1a;border:1px solid #7c3aed;color:#a855f7}
+.qtimer{text-align:right;font-size:.78rem;color:var(--warn);font-weight:700}
+.qtext{font-size:.92rem;line-height:1.5;margin:8px 0 10px}
+.fc{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.chip{padding:7px 9px;border:1px solid var(--b);border-radius:7px;cursor:pointer;font-size:.78rem;text-align:center;transition:all .15s}
+.chip.on{border-color:var(--ac);background:#1a0a35;color:var(--ac)}
+.spin{display:inline-block;width:16px;height:16px;border:2px solid var(--b);border-top-color:var(--ac);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<div id="s-init" class="scr on">
+  <div class="logo"><h1>⚡ ABILITY RACE</h1><p>Youth Skills Search</p></div>
+  <div class="card" style="text-align:center;padding:30px">
+    <div class="spin"></div><span style="color:var(--mu);font-size:.88rem">Menghubungkan...</span>
+  </div>
+</div>
+
+<div id="s-offline" class="scr">
+  <div class="logo"><h1>⚡ ABILITY RACE</h1><p>Youth Skills Search</p></div>
+  <div class="card">
+    <div class="msg er">Server sedang offline. Coba lagi beberapa saat.</div>
+    <button class="btn btn-p" style="margin-top:10px" onclick="location.reload()">Coba Lagi</button>
+  </div>
+  <div class="card">
+    <h3>🏆 Leaderboard</h3>
+    <div id="offline-lb"><div style="color:var(--mu);font-size:.85rem">Tidak tersedia saat offline</div></div>
+  </div>
+</div>
+
+<div id="s-register" class="scr">
+  <div class="logo"><h1>⚡ ABILITY RACE</h1><p>Daftar untuk mengikuti kompetisi</p></div>
+  <div class="card">
+    <div class="msg in" style="margin-bottom:10px;font-size:.8rem">
+      Pendaftaran Gratis — tidak perlu transfer
+    </div>
+    <div style="display:flex;flex-direction:column;gap:7px">
+      <input id="rr" placeholder="Nomor referensi transfer BCA">
+      <input id="rn" placeholder="Nickname (contoh: Anon)">
+      <input id="rf" placeholder="Nama Lengkap (Nama Asli)">
+      <select id="rs"><option value="">Status</option><option>Pelajar</option><option>Mahasiswa</option><option>Mahasiswi</option></select>
+      <div id="rm"></div>
+      <button class="btn btn-p" onclick="doRegister()">Daftar Sekarang</button>
+    </div>
+  </div>
+  <div class="card">
+    <h3>📋 Info Pendaftaran</h3>
+    <div class="sr"><span>Biaya</span><span class="sv">Gratis</span></div>
+    <div class="sr"><span>Bank</span><span class="sv"></span></div>
+    <div class="sr"><span>Verifikasi</span><span class="sv">Maks 24 Jam</span></div>
+    <div class="sr"><span>Championships</span><span class="sv">21 Juni 2026</span></div>
+    <div style="margin-top:8px;font-size:.78rem;color:var(--mu)">Setelah daftar, Private Key tersimpan otomatis di perangkat ini. Jangan hapus data browser.</div>
+  </div>
+  <button class="btn btn-s" onclick="go('s-lb-pub')">Lihat Leaderboard Publik</button>
+</div>
+
+<div id="s-waiting" class="scr">
+  <div class="logo"><h1>⚡ ABILITY RACE</h1></div>
+  <div class="card">
+    <h3>⏳ Menunggu Verifikasi Pembayaran</h3>
+    <div class="msg wn">Admin sedang memverifikasi pembayaran Anda. Maksimal 24 jam.</div>
+    <div style="margin-top:10px;font-size:.82rem;color:var(--mu)">Halaman ini otomatis update saat verifikasi selesai.</div>
+    <button class="btn btn-s" style="margin-top:10px" onclick="checkVerification()">Cek Status</button>
+  </div>
+  <div class="card">
+    <h3>⚠️ Penting</h3>
+    <div style="font-size:.8rem;color:var(--mu)">Private Key Anda tersimpan di browser ini. Jangan hapus data browser sampai Championships selesai (20 Juli 2026).</div>
+  </div>
+</div>
+
+<div id="s-complete" class="scr">
+  <div class="logo"><h1>⚡ ABILITY RACE</h1></div>
+  <div class="card">
+    <h3>✅ Selesaikan Pendaftaran</h3>
+    <div style="display:flex;flex-direction:column;gap:7px">
+      <input id="cn" placeholder="Nickname" id="cn">
+      <input id="cf" placeholder="Nama Lengkap">
+      <select id="cs"><option value="">Status</option><option>Pelajar</option><option>Mahasiswa</option><option>Mahasiswi</option></select>
+      <div id="com"></div>
+      <button class="btn btn-p" onclick="doComplete()">Konfirmasi Pendaftaran</button>
+    </div>
+  </div>
+</div>
+
+<div id="s-dash" class="scr">
+  <div style="display:flex;justify-content:space-between;align-items:center">
+    <div><div style="font-weight:800;font-size:1rem" id="dn">-</div><div style="font-size:.72rem;color:var(--mu)" id="ds">-</div></div>
+    <div id="conn-dot" style="width:8px;height:8px;border-radius:50%;background:var(--ok);margin-top:4px" title="Online"></div>
+  </div>
+  <div class="nav">
+    <button class="nb on" onclick="dtab('dt-home',this)">🏠</button>
+    <button class="nb" onclick="dtab('dt-mc',this)">📚 PG</button>
+    <button class="nb" onclick="dtab('dt-ch',this)">⚔️ Champ</button>
+    <button class="nb" onclick="dtab('dt-lb',this)">🏆 LB</button>
+    <button class="nb" onclick="dtab('dt-pr',this)">👤 Profil</button>
+  </div>
+  <div id="dt-home" class="tc on">
+    <div id="he"></div>
+    <div class="card"><h3>📊 Status</h3><div id="hs"><div class="spin"></div></div></div>
+    <div class="card"><h3>⚡ Ability Aktif</h3><div id="ha"><div class="spin"></div></div></div>
+  </div>
+  <div id="dt-mc" class="tc">
+    <div class="card">
+      <h3>📚 Pilihan Ganda</h3>
+      <select id="mf" onchange="loadMC()">
+        <option value="">Pilih Bidang...</option>
+        <option>Elektro</option><option>Ekonomi</option><option>Akuntansi</option>
+        <option>Rekayasa Perangkat Lunak</option><option>Fisika</option><option>Biologi</option>
+        <option>Kimia</option><option>Aktuaria</option><option>Komputer</option><option>Hukum</option>
+        <option>Filsafat</option><option>Psikologi</option><option>Marketing</option>
+        <option>Geografi</option><option>Sosiologi</option>
+      </select>
+    </div>
+    <div id="mq"></div><div id="mr"></div>
+  </div>
+  <div id="dt-ch" class="tc">
+    <div class="card"><h3>⚔️ Championships</h3><div id="cm2"><div class="spin"></div></div></div>
+  </div>
+  <div id="dt-lb" class="tc">
+    <div class="card">
+      <select id="lf" onchange="loadLB()">
+        <option value="">Pilih Bidang...</option>
+        <option>Ekonomi</option><option>Geografi</option><option>IT</option><option>Aktuaria</option>
+        <option>Fisika</option><option>Sosiologi</option><option>Kimia</option><option>Biologi</option>
+      </select>
+    </div>
+    <div id="lc"></div>
+  </div>
+  <div id="dt-pr" class="tc">
+    <div class="card"><h3>👤 Profil</h3><div id="pc"><div class="spin"></div></div></div>
+    <div class="card">
+      <h3>🎯 Pilih Bidang Championship</h3>
+      <p style="font-size:.78rem;color:var(--mu);margin-bottom:8px">Dipilih sekali, tidak bisa diubah</p>
+      <div id="cg" class="fc"></div>
+      <button class="btn btn-p" style="margin-top:8px" onclick="saveField()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<div id="s-lb-pub" class="scr">
+  <div class="logo"><h1>🏆 Leaderboard</h1></div>
+  <div class="card">
+    <select id="plf" onchange="loadPubLB()">
+      <option value="">Pilih Bidang...</option>
+      <option>Ekonomi</option><option>Geografi</option><option>IT</option><option>Aktuaria</option>
+      <option>Fisika</option><option>Sosiologi</option><option>Kimia</option><option>Biologi</option>
+    </select>
+  </div>
+  <div id="plc"></div>
+  <button class="btn btn-s" onclick="go('s-register')">← Kembali</button>
+</div>
+
+<script>
+let API = '';
+let tok='',wsT='',nick='',stat='',cField=null,selField=null,ws=null;
+let mcQ=[],mcA={},mcIdx=0,mcTmr=null,cQ=[],cIdx=0;
+
+const AMETA={
+  steal_5:{n:'Steal -5',d:'Curi 5 poin'},steal_10:{n:'Steal -10',d:'Curi 10 poin'},
+  protect_5:{n:'Protection +5',d:'Proteksi 5'},protect_10:{n:'Protection +10',d:'Proteksi 10'},
+  invisible:{n:'Invisible',d:'Rank tersembunyi 10m'},freeze:{n:'Freeze ❄️',d:'Bekukan 5m'},
+  rock:{n:'Rock 🪨',d:'Imun Freeze 5m'},darkness:{n:'Darkness 🌑',d:'Jawaban kabur 12 detik'},
+  lightness:{n:'Lightness ✨',d:'Counter Darkness'},teleport:{n:'Teleport ⚡',d:'Tukar posisi 30 detik'},
+  recovery:{n:'Recovery 💚',d:'Hapus efek negatif'},mirror:{n:'Mirror 🪞',d:'Lihat skor 5 lawan'},
+  steal_ability:{n:'Steal Ability',d:'Curi ability lawan'},
+  ability_protection:{n:'Ab. Protection 🛡',d:'Lindungi ability'},
+  cheat_score:{n:'Cheat Score 💰',d:'+50 investasi Ekonomi'},
+  logical_fallacy:{n:'Logical Fallacy 💻',d:'Kode salah lawan = -9%'},
+  scorch:{n:'⭐ SCORCH RARE',d:'Hanguskan ability 2 lawan'}
+};
+
+async function discoverBackend() {
+  const stored = localStorage.getItem('ar_api');
+  const candidates = [];
+  if (stored) candidates.push(stored);
+  try {
+    const r = await fetch('/backend_url.json', {cache:'no-cache'});
+    if (r.ok) {
+      const d = await r.json();
+      if (d.url && !candidates.includes(d.url)) candidates.push(d.url);
+    }
+  } catch(e) {}
+  for (const url of candidates) {
+    try {
+      const r = await fetch(url + '/health', {signal: AbortSignal.timeout(4000)});
+      if (r.ok) { API = url; localStorage.setItem('ar_api', url); return true; }
+    } catch(e) {}
+  }
+  return false;
+}
+
+function go(id) {
+  document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+}
+
+function dtab(id,btn) {
+  document.querySelectorAll('.tc').forEach(t=>t.classList.remove('on'));
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  btn.classList.add('on');
+  if(id==='dt-ch') loadChamp();
+  if(id==='dt-pr') loadProfile();
+  if(id==='dt-home') loadHome();
+}
+
+function toast(msg,cls='in') {
+  const e=document.createElement('div');
+  e.className='toast';
+  e.style.borderColor=cls==='er'?'var(--err)':cls==='ok'?'var(--ok)':'var(--ac)';
+  e.textContent=msg;
+  document.body.appendChild(e);
+  setTimeout(()=>e.remove(),2800);
+}
+
+async function apiFetch(path,method='GET',body=null) {
+  const h={'Content-Type':'application/json'};
+  if(tok) h['Authorization']='Bearer '+tok;
+  const o={method,headers:h};
+  if(body) o.body=JSON.stringify(body);
+  const r=await fetch(API+path,o);
+  const d=await r.json();
+  if(!r.ok) throw new Error(d.detail||'Error');
+  return d;
+}
+
+async function fp() {
+  const parts=[navigator.userAgent,navigator.language,screen.width+'x'+screen.height,
+    new Date().getTimezoneOffset(),navigator.hardwareConcurrency||0,navigator.platform||''];
+  const buf=new TextEncoder().encode(parts.join('|'));
+  const h=await crypto.subtle.digest('SHA-256',buf);
+  return Array.from(new Uint8Array(h)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+async function tryAutoLogin() {
+  const privkey = localStorage.getItem('ar_privkey');
+  if (!privkey) return false;
+  try {
+    const f = await fp();
+    const d = await apiFetch('/api/auth/auto-login','POST',{private_key_pem:privkey,machine_fingerprint:f});
+    tok=d.access_token; wsT=d.ws_ticket||''; nick=d.nickname; stat=d.status; cField=d.championship_field;
+    localStorage.setItem('ar_tok',tok); localStorage.setItem('ar_ws',wsT);
+    localStorage.setItem('ar_nick',nick); localStorage.setItem('ar_stat',stat);
+    return d;
+  } catch(e) { return false; }
+}
+
+async function initApp() {
+  const online = await discoverBackend();
+  if (!online) { go('s-offline'); return; }
+  const session = await tryAutoLogin();
+  if (session) {
+    if (!session.payment_verified) { go('s-waiting'); return; }
+    const u = await apiFetch('/api/auth/profile').catch(()=>null);
+    if (u && !u.full_name || u.full_name === 'PENDING') { go('s-complete'); return; }
+    document.getElementById('dn').textContent = nick;
+    document.getElementById('ds').textContent = stat;
+    go('s-dash');
+    loadHome();
+    initWS();
+    return;
+  }
+  go('s-register');
+}
+
+async function doRegister() {
+  const ref=document.getElementById('rr').value.trim();
+  if(!ref){document.getElementById('rm').className='msg er';document.getElementById('rm').textContent='Masukkan nomor referensi transfer';return}
+  const f=await fp();
+  document.getElementById('rm').className='msg in';
+  document.getElementById('rm').textContent='Memproses...';
+  try {
+    const d=await apiFetch('/api/auth/pre-register','POST',{bank_reference:ref,machine_fingerprint:f});
+    localStorage.setItem('ar_privkey', d.private_key_pem);
+    localStorage.setItem('ar_tmpuid', d.temp_user_id);
+    document.getElementById('rm').innerHTML=`<div class="msg ok">✅ Private Key tersimpan otomatis di browser ini. Pembayaran menunggu verifikasi admin.</div><div style="font-size:.75rem;color:var(--mu);margin-top:6px">Temp ID: ${d.temp_user_id}</div>`;
+    setTimeout(()=>go('s-waiting'), 2000);
+  } catch(e) {
+    document.getElementById('rm').className='msg er';
+    document.getElementById('rm').textContent=e.message;
+  }
+}
+
+async function checkVerification() {
+  const session = await tryAutoLogin();
+  if (session && session.payment_verified) {
+    go('s-complete');
+  } else if (session && !session.payment_verified) {
+    toast('Belum diverifikasi. Coba lagi nanti.','wn');
+  }
+}
+
+async function doComplete() {
+  const n=document.getElementById('cn').value.trim();
+  const f=document.getElementById('cf').value.trim();
+  const s=document.getElementById('cs').value;
+  if(!n||!f||!s){document.getElementById('com').className='msg er';document.getElementById('com').textContent='Lengkapi semua field';return}
+  const fp_=await fp();
+  const uid=localStorage.getItem('ar_tmpuid')||'';
+  try {
+    await apiFetch('/api/auth/complete-register','POST',{temp_user_id:uid,nickname:n,full_name:f,status:s,machine_fingerprint:fp_});
+    const session=await tryAutoLogin();
+    if(session){
+      document.getElementById('dn').textContent=nick;
+      document.getElementById('ds').textContent=stat;
+      go('s-dash'); loadHome(); initWS();
+    }
+  } catch(e) {
+    document.getElementById('com').className='msg er';
+    document.getElementById('com').textContent=e.message;
+  }
+}
+
+async function loadHome() {
+  try {
+    const d=await apiFetch('/api/competition/championship/status');
+    const e=document.getElementById('hs');
+    e.innerHTML=`<div class="sr"><span>Championships</span><span class="bg ${d.championships_open?'bk':'bw'}">${d.championships_open?'BUKA':'BELUM BUKA'}</span></div><div class="sr"><span>Bidang</span><span class="sv">${d.field}</span></div><div class="sr"><span>Week / Hari</span><span class="sv">W${d.week} / D${d.day}</span></div>${d.is_frozen?'<div class="efb ef-fz" style="margin-top:6px">❄️ ANDA DIBEKUKAN</div>':''}${d.ability_pending?'<div class="msg wn" style="margin-top:6px">⚡ Ability menunggu dipilih di tab Champ.</div>':''}`;
+  } catch(e) {}
+  loadAbilities();
+}
+
+async function loadAbilities() {
+  try {
+    const d=await apiFetch('/api/competition/championship/abilities');
+    const e=document.getElementById('ha');
+    if(!d.abilities.length){e.innerHTML='<div style="color:var(--mu);font-size:.82rem">Belum ada ability aktif</div>';return}
+    e.innerHTML=d.abilities.map(a=>`<div class="ac ${a.type==='scorch'?'rare':''}"><div style="display:flex;justify-content:space-between"><div class="an">${a.name}</div>${a.expires_at?`<div style="font-size:.68rem;color:var(--warn)">${fmt(a.expires_at)}</div>`:''}</div><div class="ad">${a.description}</div><button class="btn btn-s" style="margin-top:5px;padding:4px 8px;font-size:.72rem" onclick="useAb('${a.id}','${a.type}')">Gunakan</button></div>`).join('');
+  } catch(e) {}
+}
+
+function fmt(iso){const diff=Math.max(0,new Date(iso)-Date.now());return Math.floor(diff/60000)+'m'+Math.floor((diff%60000)/1000)+'s'}
+
+async function loadMC() {
+  const field=document.getElementById('mf').value;if(!field)return;
+  document.getElementById('mq').innerHTML='<div style="text-align:center;padding:16px"><div class="spin"></div></div>';
+  try {
+    const d=await apiFetch(`/api/competition/multiple-choice/questions/${encodeURIComponent(field)}`);
+    mcQ=d.questions;mcA={};mcIdx=0;renderMC();
+  } catch(e){document.getElementById('mq').innerHTML=`<div class="msg er">${e.message}</div>`}
+}
+
+function renderMC() {
+  if(mcIdx>=mcQ.length){submitMC();return}
+  const q=mcQ[mcIdx];let t=50;if(mcTmr)clearInterval(mcTmr);
+  const opts=q.options||{};
+  document.getElementById('mq').innerHTML=`<div class="card"><div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:.75rem;color:var(--mu)">Soal ${mcIdx+1}/${mcQ.length}</span><span class="qtimer" id="mt">${t}s</span></div><div class="pb"><div class="pf" style="width:${mcIdx/mcQ.length*100}%"></div></div><div class="qtext">${q.question}</div>${['a','b','c','d'].map(k=>opts[k]?`<button class="opt" onclick="pickMC(this,'${q.id}','${k.toUpperCase()}')">${k.toUpperCase()}. ${opts[k]}</button>`:'').join('')}</div>`;
+  mcTmr=setInterval(()=>{t--;const te=document.getElementById('mt');if(te){te.textContent=t+'s';te.style.color=t<=10?'var(--err)':'var(--warn)'}if(t<=0){clearInterval(mcTmr);if(!mcA[q.id])mcA[q.id]='';mcIdx++;renderMC()}},1000);
+}
+
+function pickMC(btn,qid,ans){if(mcTmr)clearInterval(mcTmr);document.querySelectorAll('.opt').forEach(b=>b.classList.remove('sel'));btn.classList.add('sel');mcA[qid]=ans;setTimeout(()=>{mcIdx++;renderMC()},350)}
+
+async function submitMC() {
+  const field=document.getElementById('mf').value;
+  const answers=Object.entries(mcA).map(([q,a])=>({question_id:q,user_answer:a}));
+  document.getElementById('mq').innerHTML='<div style="text-align:center;padding:16px"><div class="spin"></div></div>';
+  try {
+    const d=await apiFetch('/api/competition/multiple-choice/submit','POST',{field,answers});
+    document.getElementById('mr').innerHTML=`<div class="card"><h3>✅ Hasil — ${field}</h3><div class="sr"><span>Benar</span><span class="sv" style="color:var(--ok)">${d.correct}</span></div><div class="sr"><span>Salah</span><span class="sv" style="color:var(--err)">${d.wrong}</span></div><div class="sr"><span>Skor</span><span class="sv">${d.raw_score}</span></div><div class="sr"><span>%</span><span class="sv">${d.percentage}%</span></div><button class="btn btn-p" style="margin-top:8px" onclick="loadMC()">Ulangi</button></div>`;
+    document.getElementById('mq').innerHTML='';
+  } catch(e){document.getElementById('mr').innerHTML=`<div class="msg er">${e.message}</div>`}
+}
+
+async function loadChamp() {
+  const c=document.getElementById('cm2');c.innerHTML='<div class="spin"></div>';
+  try {
+    const d=await apiFetch('/api/competition/championship/status');
+    if(!d.championships_open){c.innerHTML='<div class="msg in">Championships dibuka 21 Juni 2026 pukul 10:00 WIB.</div>';return}
+    if(!d.field||d.field==='Belum dipilih'){c.innerHTML='<div class="msg wn">Pilih bidang Championship di tab Profil terlebih dahulu.</div>';return}
+    if(d.eliminated){c.innerHTML='<div class="msg er">⛔ Anda telah tereliminasi.</div>';return}
+    if(d.ability_pending){loadAbilitySelect(c,d.ability_options);return}
+    c.innerHTML=`<div class="sr"><span>Bidang</span><span class="sv">${d.field}</span></div><div class="sr"><span>Week/Hari</span><span class="sv">W${d.week}/D${d.day}</span></div><div class="sr"><span>Tipe Tes</span><span class="bg bp">${d.test_type||'-'}</span></div><div class="sr"><span>Streak</span><span class="sv">${d.consecutive_correct}/10</span></div>${d.is_frozen?'<div class="efb ef-fz" style="margin-top:6px">❄️ DIBEKUKAN — Tunggu 5 menit</div>':''}<button class="btn btn-p" style="margin-top:8px" onclick="loadChampQ()">Kerjakan Soal</button><button class="btn btn-s" style="margin-top:6px" onclick="loadScore()">Lihat Skor Saya</button>`;
+  } catch(e){c.innerHTML=`<div class="msg er">${e.message}</div>`}
+}
+
+async function loadChampQ() {
+  const c=document.getElementById('cm2');c.innerHTML='<div class="spin"></div>';
+  try {
+    const d=await apiFetch('/api/competition/championship/questions');
+    if(d.action_required==='ability_selection'){loadAbilitySelect(c,d.ability_options);return}
+    cQ=d.questions;cIdx=0;renderCQ(d);
+  } catch(e){c.innerHTML=`<div class="msg er">${e.message}</div>`}
+}
+
+function renderCQ(meta) {
+  if(cIdx>=cQ.length){document.getElementById('cm2').innerHTML='<div class="msg ok">✅ Semua soal dikerjakan.</div><button class="btn btn-s" style="margin-top:8px" onclick="loadScore()">Lihat Skor</button>';return}
+  const q=cQ[cIdx];const tt=meta.test_type||'';let html=`<div class="qtext">${q.question||q.sequence_given||q.statement||''}</div>`;
+  if(['click_test','which_is_true'].includes(tt)){html+=`<button class="opt" onclick="answerCQ('${q.id}','A',this)">A. ${q.option_a||''}</button><button class="opt" onclick="answerCQ('${q.id}','B',this)">B. ${q.option_b||''}</button>`}
+  else if(['multiple_choice','incoexistent','grand_prix_pg'].includes(tt)){const o=q.options||{};html+=Object.entries(o).map(([k,v])=>`<button class="opt" onclick="answerCQ('${q.id}','${k.toUpperCase()}',this)">${k.toUpperCase()}. ${v}</button>`).join('')}
+  else if(tt==='matching_true_false'){html+=`<button class="opt" onclick="answerCQ('${q.id}','TRUE',this)">TRUE ✓</button><button class="opt" onclick="answerCQ('${q.id}','FALSE',this)">FALSE ✗</button>`}
+  else if(tt==='memory_test'){const opts=q.match_options||[];html+=opts.map((o,i)=>`<button class="opt" onclick="answerCQ('${q.id}','${i}',this)">${i}. ${o}</button>`).join('')}
+  else{html+=`<input id="ta" placeholder="${tt==='one_word'?'Ketik satu kata...':'Berikan contoh...'}"><button class="btn btn-p" style="margin-top:6px" onclick="textAns('${q.id}')">Kirim</button>`}
+  document.getElementById('cm2').innerHTML=`<div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:.75rem;color:var(--mu)">${cIdx+1}/${cQ.length} soal</span><span style="font-size:.75rem;color:var(--ac2)">${meta.field||''} W${meta.week||''}</span></div><div class="card">${html}</div><div id="cr"></div>`;
+  cQ[cIdx]._meta=meta;
+}
+
+async function answerCQ(qid,ans,btn) {
+  document.querySelectorAll('.opt').forEach(b=>b.disabled=true);
+  try {
+    const d=await apiFetch('/api/competition/championship/answer','POST',{question_id:qid,user_answer:ans});
+    if(btn)btn.classList.add(d.points_earned>0?'cor':d.points_earned<0?'wrg':'');
+    const cr=document.getElementById('cr');
+    if(cr)cr.innerHTML=`<div class="msg ${d.points_earned>0?'ok':d.points_earned<0?'er':'wn'}">${d.points_earned>0?'✅ Benar!':'❌ Salah'} ${d.points_earned>0?'+'+d.points_earned:d.points_earned} poin | Total: ${d.raw_score}</div>`;
+    setTimeout(()=>{cIdx++;const m=cQ[cIdx-1]?._meta||{};if(d.ability_triggered)loadChampQ();else renderCQ(m)},700);
+  } catch(e){const cr=document.getElementById('cr');if(cr)cr.innerHTML=`<div class="msg er">${e.message}</div>`;document.querySelectorAll('.opt').forEach(b=>b.disabled=false)}
+}
+
+async function textAns(qid){const a=document.getElementById('ta')?.value?.trim()||'';if(!a){toast('Masukkan jawaban','er');return}await answerCQ(qid,a,null)}
+
+function loadAbilitySelect(c,opts) {
+  c.innerHTML=`<div class="msg in" style="margin-bottom:8px">⚡ Streak 10x! Pilih 1 dari 4 Ability:</div><div class="fc">${opts.map(ab=>`<div class="ac ${ab==='scorch'?'rare':''}" onclick="pickAb('${ab}')"><div class="an">${AMETA[ab]?.n||ab}</div><div class="ad">${AMETA[ab]?.d||''}</div></div>`).join('')}</div>`;
+}
+
+async function pickAb(ab) {
+  try{const d=await apiFetch('/api/competition/championship/ability/select','POST',{selected_ability:ab});toast('⚡ '+d.name,'ok');loadChampQ()}catch(e){toast(e.message,'er')}
+}
+
+async function useAb(abId,atype) {
+  const needTarget=['freeze','darkness'].includes(atype);
+  const tid=needTarget?prompt('User ID target:'):null;
+  if(needTarget&&!tid)return;
+  try{const d=await apiFetch('/api/competition/championship/ability/use','POST',{ability_id:abId,target_user_id:tid||null});
+  toast(d.success?'⚡ Digunakan!':(d.reason||'Gagal'),d.success?'ok':'er');
+  if(d.mirror_data)alert('Mirror:\n'+d.mirror_data.map(m=>`${m.nickname}: ${m.raw_score}`).join('\n'));
+  loadAbilities()}catch(e){toast(e.message,'er')}
+}
+
+async function loadScore() {
+  try{const d=await apiFetch('/api/competition/championship/my-score');
+  document.getElementById('cm2').innerHTML=`<div class="sr"><span>Skor</span><span class="sv">${d.raw_score}</span></div><div class="sr"><span>Benar</span><span class="sv">${d.correct}</span></div><div class="sr"><span>Total</span><span class="sv">${d.total}</span></div><div class="sr"><span>%</span><span class="sv">${d.percentage}%</span></div><div class="sr"><span>Status</span><span class="bg ${d.eliminated?'be':'bk'}">${d.eliminated?'TERELIMINASI':'AKTIF'}</span></div><button class="btn btn-p" style="margin-top:8px" onclick="loadChampQ()">Lanjut Mengerjakan</button>`}catch(e){toast(e.message,'er')}
+}
+
+async function loadLB() {
+  const f=document.getElementById('lf').value;if(!f)return;
+  const c=document.getElementById('lc');c.innerHTML='<div class="spin"></div>';
+  try{const d=await apiFetch(`/api/leaderboard/championship/${encodeURIComponent(f)}`);if(d.message){c.innerHTML=`<div class="msg wn">${d.message}</div>`;return}renderLB(c,d)}catch(e){c.innerHTML=`<div class="msg er">${e.message}</div>`}
+}
+
+async function loadPubLB() {
+  const f=document.getElementById('plf').value;if(!f)return;
+  const c=document.getElementById('plc');c.innerHTML='<div class="spin"></div>';
+  try{const d=await apiFetch(`/api/leaderboard/championship/${encodeURIComponent(f)}`);if(d.message){c.innerHTML=`<div class="msg wn">${d.message}</div>`;return}renderLB(c,d)}catch(e){c.innerHTML=`<div class="msg er">${e.message}</div>`}
+}
+
+function renderLB(c,d) {
+  const rows=d.leaderboard||[];if(!rows.length){c.innerHTML='<div class="msg in">Belum ada data</div>';return}
+  const gc=r=>r.rank===1?'#ffd700':r.rank===2?'#c0c0c0':r.rank===3?'#cd7f32':'var(--mu)';
+  c.innerHTML='<div class="card">'+rows.map(r=>`<div class="rr"><div class="rn" style="color:${gc(r)}">#${r.rank}</div><div class="ri"><div class="rname">${r.invisible?'???':r.nickname}${r.eliminated?' ⛔':''}</div><div class="rdet">${r.status||''} · ${r.percentage!==null?r.percentage+'%':'???'}</div></div><div class="rs">${r.composite_score!==null?r.composite_score:'???'}</div></div>`).join('')+'</div>';
+}
+
+async function loadProfile() {
+  const c=document.getElementById('pc');c.innerHTML='<div class="spin"></div>';
+  try{const d=await apiFetch('/api/auth/profile');cField=d.championship_field;
+  let h=`<div class="sr"><span>Nickname</span><span class="sv">${d.nickname}</span></div><div class="sr"><span>Nama</span><span class="sv">${d.full_name}</span></div><div class="sr"><span>Status</span><span class="bg bp">${d.status}</span></div><div class="sr"><span>Bidang Champ.</span><span class="sv">${d.championship_field}</span></div>`;
+  if(d.multiple_choice_stats?.length){h+='<div style="margin-top:8px;font-size:.8rem;font-weight:700;color:var(--ac2)">Statistik PG</div>';d.multiple_choice_stats.forEach(s=>{h+=`<div class="sr"><span>${s.field}</span><span class="sv">${s.percentage}% · ${s.composite_score}</span></div>`})}
+  c.innerHTML=h;buildFieldGrid(d.championship_field)}catch(e){c.innerHTML=`<div class="msg er">${e.message}</div>`}
+}
+
+function buildFieldGrid(cur) {
+  const f={1:'Ekonomi',2:'Geografi',3:'IT',4:'Aktuaria',5:'Fisika',6:'Sosiologi',7:'Kimia',8:'Biologi'};
+  document.getElementById('cg').innerHTML=Object.entries(f).map(([id,n])=>`<div class="chip ${n===cur?'on':''}" onclick="pickField(${id},'${n}',this)">${id}. ${n}</div>`).join('');
+}
+
+function pickField(id,name,el){document.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));el.classList.add('on');selField=id}
+
+async function saveField() {
+  if(!selField){toast('Pilih bidang dulu','er');return}
+  try{const d=await apiFetch('/api/auth/select-fields','POST',{championship_field:selField});toast('✅ '+d.championship_field_name,'ok')}catch(e){toast(e.message,'er')}
+}
+
+function initWS() {
+  if(!tok||!wsT)return;
+  try {
+    const uid=JSON.parse(atob(tok.split('.')[1])).sub;
+    const wsBase=API.replace('https://','wss://').replace('http://','ws://');
+    ws=new WebSocket(`${wsBase}/ws/${uid}/${wsT}?field_id=${cField||0}`);
+    ws.onmessage=e=>{try{const m=JSON.parse(e.data);if(m.event==='ability_applied'){toast('⚡ '+(AMETA[m.ability]?.n||m.ability),'in');loadAbilities()}}catch(e){}};
+    ws.onclose=()=>setTimeout(initWS,5000);
+    ws.onerror=()=>{};
+  } catch(e) {}
+}
+
+initApp();
+</script>
+</body>
+</html>

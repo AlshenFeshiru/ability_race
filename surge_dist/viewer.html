@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ability Race — Live Viewer</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#04040a;--card:#0a0a14;--b:#16162a;--ac:#7c3aed;--ac2:#06b6d4;--warn:#f59e0b;--ok:#10b981;--tx:#e2e8f0;--mu:#475569;--f:'Segoe UI',system-ui,sans-serif}
+body{background:var(--bg);color:var(--tx);font-family:var(--f);min-height:100vh}
+.header{background:linear-gradient(135deg,#0f0f1e,#1a0a35);padding:16px;text-align:center;border-bottom:1px solid var(--b)}
+.header h1{font-size:1.3rem;font-weight:900;background:linear-gradient(135deg,var(--ac),var(--ac2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.header p{color:var(--mu);font-size:.75rem;margin-top:2px}
+.controls{display:flex;gap:8px;padding:12px;overflow-x:auto;-ms-overflow-style:none;scrollbar-width:none}
+.controls::-webkit-scrollbar{display:none}
+.fb{flex:none;padding:7px 14px;border:1px solid var(--b);border-radius:20px;background:transparent;color:var(--mu);font-size:.8rem;cursor:pointer}
+.fb.on{border-color:var(--ac);color:var(--ac);background:#1a0a35}
+.lb{padding:12px;max-width:600px;margin:0 auto}
+.row{display:flex;align-items:center;gap:10px;padding:10px;background:var(--card);border:1px solid var(--b);border-radius:10px;margin-bottom:6px;transition:all .3s}
+.row.moved-up{border-color:var(--ok)}
+.row.moved-down{border-color:var(--warn)}
+.rank{font-weight:900;min-width:28px;font-size:1.1rem}
+.av{width:44px;height:44px;border-radius:50%;flex-shrink:0}
+.info{flex:1}
+.nick{font-weight:700;font-size:.9rem}
+.det{font-size:.72rem;color:var(--mu);margin-top:2px}
+.score{text-align:right;font-weight:700;color:var(--ac2);font-size:.95rem}
+.pct{font-size:.72rem;color:var(--mu)}
+.rate-wrap{display:flex;align-items:center;gap:4px}
+.star{font-size:.8rem;cursor:pointer;color:var(--mu)}
+.star.on{color:var(--warn)}
+.live-dot{display:inline-block;width:7px;height:7px;background:var(--ok);border-radius:50%;margin-right:6px;animation:bl 1s infinite}
+@keyframes bl{0%,100%{opacity:1}50%{opacity:.3}}
+.field-tag{display:inline-block;padding:2px 7px;border-radius:10px;font-size:.68rem;background:#1a0a35;color:var(--ac);margin-left:4px}
+.elim{opacity:.4;text-decoration:line-through}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>⚡ ABILITY RACE — <span class="live-dot"></span>LIVE</h1>
+  <p>Siaran langsung kompetisi · Pilih bidang yang ingin ditonton</p>
+</div>
+<div class="controls" id="field-btns"></div>
+<div class="lb" id="lb"></div>
+<script>
+const API = '';
+let currentField = 'Ekonomi';
+let prevRanks = {};
+let myRatings = JSON.parse(localStorage.getItem('ar_v_ratings') || '{}');
+
+const FIELDS = ['Ekonomi','Geografi','IT','Aktuaria','Fisika','Sosiologi','Kimia','Biologi'];
+
+function buildFieldBtns() {
+  const c = document.getElementById('field-btns');
+  FIELDS.forEach(f => {
+    const b = document.createElement('button');
+    b.className = 'fb' + (f === currentField ? ' on' : '');
+    b.textContent = f;
+    b.onclick = () => {
+      currentField = f;
+      document.querySelectorAll('.fb').forEach(x => x.classList.remove('on'));
+      b.classList.add('on');
+      loadLB();
+    };
+    c.appendChild(b);
+  });
+}
+
+function avatarSVG(id) {
+  const elements = ['🔥','❄️','🌪️','⚡','🌊','🌿','🌑','☀️','🪨','✨'];
+  const colors = ['#ef4444','#3b82f6','#8b5cf6','#f59e0b','#06b6d4','#10b981','#6366f1','#f97316','#84cc16','#ec4899'];
+  const el = elements[(id-1) % elements.length];
+  const bg = colors[Math.floor((id-1) / 10) % colors.length];
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='44' height='44' viewBox='0 0 44 44'><circle cx='22' cy='22' r='22' fill='${bg}'/><text x='22' y='28' font-size='20' text-anchor='middle'>${el}</text></svg>`)}`;
+}
+
+function stars(userId, current) {
+  return [1,2,3,4,5,6,7,8,9,10].map(n =>
+    `<span class="star ${n <= (current||0) ? 'on':''}" onclick="rate('${userId}',${n})">★</span>`
+  ).join('');
+}
+
+async function rate(userId, val) {
+  const count = Object.keys(myRatings).length;
+  if (!myRatings[userId] && count >= 3) {
+    alert('Maksimal 3 peserta yang dapat Anda beri rating');
+    return;
+  }
+  myRatings[userId] = val;
+  localStorage.setItem('ar_v_ratings', JSON.stringify(myRatings));
+  await fetch(`${API}/api/viewer/rate`, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({target_user_id: userId, rating: val, lock: false})
+  }).catch(()=>{});
+  loadLB();
+}
+
+async function loadLB() {
+  const r = await fetch(`${API}/api/viewer/live/${encodeURIComponent(currentField)}`).catch(()=>null);
+  if (!r || !r.ok) { document.getElementById('lb').innerHTML='<div style="color:var(--mu);padding:20px;text-align:center">Backend offline</div>'; return; }
+  const d = await r.json();
+  const lb = document.getElementById('lb');
+  if (!d.leaderboard.length) { lb.innerHTML='<div style="color:var(--mu);padding:20px;text-align:center">Belum ada data</div>'; return; }
+  lb.innerHTML = d.leaderboard.map(p => {
+    const prev = prevRanks[p.nickname];
+    const cls = prev && prev > p.rank ? 'moved-up' : prev && prev < p.rank ? 'moved-down' : '';
+    const gc = p.rank===1?'#ffd700':p.rank===2?'#c0c0c0':p.rank===3?'#cd7f32':'var(--mu)';
+    const myRating = myRatings[p.nickname] || 0;
+    prevRanks[p.nickname] = p.rank;
+    return `<div class="row ${cls} ${p.eliminated?'elim':''}">
+      <div class="rank" style="color:${gc}">#${p.rank}</div>
+      <img class="av" src="${avatarSVG(p.avatar_id||1)}" alt="">
+      <div class="info">
+        <div class="nick">${p.invisible?'???':p.nickname} <span class="field-tag">${currentField}</span></div>
+        <div class="det">${p.status||''} · ${p.percentage!==null?p.percentage+'%':'???'} · ⭐${p.viewer_rating||0}/10</div>
+        <div class="rate-wrap">${stars(p.nickname, myRating)}</div>
+      </div>
+      <div style="text-align:right">
+        <div class="score">${p.composite_score!==null?p.composite_score:'???'}</div>
+        <div class="pct">${p.eliminated?'ELIM':p.invisible?'HIDDEN':''}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+buildFieldBtns();
+loadLB();
+setInterval(loadLB, 8000);
+</script>
+</body>
+</html>

@@ -1,0 +1,24 @@
+services:
+  ability_race:
+    image: ghcr.io/${GITHUB_USER}/ability_race:latest
+    container_name: ability_race
+    restart: unless-stopped
+    ports:
+      - "0.0.0.0:28836:28836"
+    volumes:
+      - ar_data:/data
+    tmpfs:
+      - /tmp:size=256m
+    environment:
+      - SERVER_PORT=28836
+      - DATABASE_URL=sqlite:////data/ability_race.db
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - SECRET_KEY=${SECRET_KEY}
+      - ADMIN_TOKEN=${ADMIN_TOKEN}
+      - KECCAK_CTRL=${KECCAK_CTRL}
+      - ORGANIZER_TOKEN=${ORGANIZER_TOKEN}
+    network_mode: host
+
+volumes:
+  ar_data:
+    driver: local
