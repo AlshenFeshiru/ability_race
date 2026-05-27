@@ -95,5 +95,6 @@ def health(): return {"ok": True}
 
 if __name__ == "__main__":
     ip = _pub_ip()
-    print(f"\nAbility Race | port {SERVER_PORT} | {ip}")
-    uvicorn.run("main:app", host="0.0.0.0", port=SERVER_PORT, reload=False, workers=1, log_level="warning", access_log=False)
+    port = 7860 if os.environ.get("SPACE_ID") else SERVER_PORT
+    print(f"\nAbility Race | port {port} | {ip}")
+    uvicorn.run("main:app", host="0.0.0.0", port=port, reload=False, workers=1, log_level="warning", access_log=False)
