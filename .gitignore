@@ -1,6 +1,13 @@
+.env
 *.db
-data/*.db
 __pycache__/
 *.pyc
-*.db*
-.env
+*.pyo
+surge_participant/
+surge_viewer/
+*.egg-info/
+.eggs/
+dist/
+build/
+*.log
+.DS_Store
